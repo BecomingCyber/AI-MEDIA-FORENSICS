@@ -1,0 +1,41 @@
+# Virtual environments
+venv/
+.venv/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Uploaded forensic evidence
+uploads/*
+!uploads/.gitkeep
+
+# Generated forensic reports
+reports/*
+!reports/.gitkeep
+
+# Test/cache files
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE files
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp

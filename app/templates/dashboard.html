@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Media Forensics</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <div>
+          <p class="eyebrow">DIGITAL MEDIA FORENSICS</p>
+          <h1>AI-Assisted Synthetic Media Forensics</h1>
+          <p class="subtitle">
+            Analyze image evidence using file validation, SHA-256 hashing, EXIF
+            metadata review, image-structure analysis, heuristic signal scoring,
+            and AI-assisted explanation.
+          </p>
+        </div>
+      </header>
+
+      <main class="content-grid">
+        <section class="panel upload-panel">
+          <h2>Upload Evidence</h2>
+
+          <p class="panel-description">
+            Upload a JPG, JPEG, or PNG image for authorized forensic review.
+          </p>
+
+          <form
+            action="{{ url_for('analyze') }}"
+            method="post"
+            enctype="multipart/form-data"
+          >
+            <label class="file-label" for="evidence_file">
+              Select image evidence
+            </label>
+
+            <input
+              type="file"
+              id="evidence_file"
+              name="evidence_file"
+              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+              required
+            />
+
+            <button type="submit" class="primary-button">
+              Run Forensic Analysis
+            </button>
+          </form>
+
+          <div class="notice">
+            <strong>Evidence handling:</strong>
+            Uploaded files are analyzed using a randomized temporary filename
+            and removed after processing.
+          </div>
+        </section>
+
+        {% if error %}
+        <section class="panel error-panel">
+          <h2>Analysis Error</h2>
+          <p>{{ error }}</p>
+        </section>
+        {% endif %} {% if result %}
+
+        <section class="panel summary-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">ASSESSMENT SUMMARY</p>
+              <h2>{{ result.original_filename }}</h2>
+            </div>
+
+            <div class="score-block">
+              <span class="score"> {{ result.detection.review_score }} </span>
+              <span class="score-label"> Review Score </span>
+            </div>
+          </div>
+
+          <div class="summary-cards">
+            <div class="summary-card">
+              <span class="card-label"> Assessment </span>
+              <span class="card-value">
+                {{ result.detection.assessment }}
+              </span>
+            </div>
+
+            <div class="summary-card">
+              <span class="card-label"> Signals </span>
+              <span class="card-value">
+                {{ result.detection.signal_count }}
+              </span>
+            </div>
+
+            <div class="summary-card">
+              <span class="card-label"> AI Explanation Mode </span>
+              <span class="card-value"> {{ result.explanation.mode }} </span>
+            </div>
+
+            <div class="summary-card">
+              <span class="card-label"> File Type </span>
+              <span class="card-value">
+                {{ result.file_information.image_format }}
+              </span>
+            </div>
+          </div>
+
+          <p class="disclaimer">{{ result.detection.disclaimer }}</p>
+
+          <form action="{{ url_for('download_report') }}" method="get">
+            <button type="submit" class="primary-button">
+              Download Forensic Report
+            </button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>File Information</h2>
+
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <tbody>
+                <tr>
+                  <th>Original File</th>
+                  <td>{{ result.original_filename }}</td>
+                </tr>
+
+                <tr>
+                  <th>Format</th>
+                  <td>{{ result.file_information.image_format }}</td>
+                </tr>
+
+                <tr>
+                  <th>Dimensions</th>
+                  <td>
+                    {{ result.file_information.width }} × {{
+                    result.file_information.height }}
+                  </td>
+                </tr>
+
+                <tr>
+                  <th>Color Mode</th>
+                  <td>{{ result.file_information.color_mode }}</td>
+                </tr>
+
+                <tr>
+                  <th>File Size</th>
+                  <td>{{ result.file_information.file_size_bytes }} bytes</td>
+                </tr>
+
+                <tr>
+                  <th>SHA-256</th>
+                  <td class="hash-value">
+                    {{ result.file_information.sha256 }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Metadata Analysis</h2>
+
+          <div class="summary-cards">
+            <div class="summary-card">
+              <span class="card-label"> Metadata Present </span>
+              <span class="card-value">
+                {% if result.metadata.metadata_present %} Yes {% else %} No {%
+                endif %}
+              </span>
+            </div>
+
+            <div class="summary-card">
+              <span class="card-label"> EXIF Fields </span>
+              <span class="card-value">
+                {{ result.metadata.metadata_count }}
+              </span>
+            </div>
+          </div>
+
+          {% if result.metadata.summary %}
+
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <tbody>
+                {% for key, value in result.metadata.summary.items() %}
+                <tr>
+                  <th>{{ key }}</th>
+                  <td>{{ value }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% else %}
+
+          <p class="muted-text">
+            No focused EXIF metadata fields were detected.
+          </p>
+
+          {% endif %}
+        </section>
+
+        <section class="panel">
+          <h2>Image Signal Analysis</h2>
+
+          <div class="signal-grid">
+            <div class="signal-card">
+              <span class="card-label"> Width </span>
+              <span class="signal-value">
+                {{ result.image_analysis.dimensions.width }}
+              </span>
+            </div>
+
+            <div class="signal-card">
+              <span class="card-label"> Height </span>
+              <span class="signal-value">
+                {{ result.image_analysis.dimensions.height }}
+              </span>
+            </div>
+
+            <div class="signal-card">
+              <span class="card-label"> Aspect Ratio </span>
+              <span class="signal-value">
+                {{ result.image_analysis.dimensions.aspect_ratio }}
+              </span>
+            </div>
+
+            <div class="signal-card">
+              <span class="card-label"> Mean Brightness </span>
+              <span class="signal-value">
+                {{ result.image_analysis.brightness.mean_brightness }}
+              </span>
+            </div>
+
+            <div class="signal-card">
+              <span class="card-label"> Edge Density </span>
+              <span class="signal-value">
+                {{ result.image_analysis.edges.edge_density }}
+              </span>
+            </div>
+
+            <div class="signal-card">
+              <span class="card-label"> Laplacian Variance </span>
+              <span class="signal-value">
+                {{ result.image_analysis.sharpness.laplacian_variance }}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Forensic Signals</h2>
+
+          {% if result.detection.signals %}
+
+          <div class="findings-list">
+            {% for signal in result.detection.signals %}
+
+            <article class="finding-card">
+              <div class="finding-header">
+                <strong> {{ signal.signal }} </strong>
+
+                <span class="weight-badge"> Weight {{ signal.weight }} </span>
+              </div>
+
+              <p>{{ signal.description }}</p>
+
+              <span class="category-tag"> {{ signal.category }} </span>
+            </article>
+
+            {% endfor %}
+          </div>
+
+          {% else %}
+
+          <div class="success-message">
+            No configured forensic review signals were detected in this
+            analysis.
+          </div>
+
+          {% endif %}
+        </section>
+
+        <section class="panel">
+          <h2>AI-Assisted Explanation</h2>
+
+          <div class="ai-meta">
+            <span>
+              Mode:
+              <strong> {{ result.explanation.mode }} </strong>
+            </span>
+
+            <span>
+              Model:
+              <strong> {{ result.explanation.model }} </strong>
+            </span>
+          </div>
+
+          <pre class="explanation-box">
+{{ result.explanation.explanation }}</pre
+          >
+
+          <div class="notice">
+            AI output explains existing findings only. It does not replace
+            forensic evidence, independent verification, or human judgment.
+          </div>
+        </section>
+
+        {% endif %}
+      </main>
+
+      <footer class="site-footer">
+        <p>
+          AI-assisted analysis should support investigation — not replace human
+          judgment.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
