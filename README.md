@@ -609,3 +609,24 @@ Collect → Validate → Analyze → Interpret → Document → Verify
 ```
 
 **Build the skills. Prove the work.**
+
+---
+
+## ✅ Continuous Integration
+
+Every push and pull request to `main` runs the automated forensic test suite through GitHub Actions.
+
+The CI workflow:
+
+- Uses Python 3.12
+- Installs the project dependencies
+- Runs the application in mock AI mode
+- Executes the complete pytest suite
+- Requires no API key or external AI request
+- Verifies the forensic analysis, detection, metadata, AI-explanation, and PDF-reporting components
+
+**Current automated test suite: 47 tests passing.**
+
+![GitHub Actions Forensic Test Suite passing](screenshots/01-github-actions-passed.png)
+
+This provides reproducible evidence that the project's core forensic workflow is automatically validated whenever the code changes.
